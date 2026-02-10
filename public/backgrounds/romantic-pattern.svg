@@ -1,0 +1,28 @@
+<svg width="260" height="260" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
+  <g opacity="0.65">
+    <!-- Heart shape -->
+    <path
+      d="M130 165
+         C130 130, 85 120, 85 80
+         C85 45, 130 45, 130 80
+         C130 45, 175 45, 175 80
+         C175 120, 130 130, 130 165 Z"
+      fill="none"
+      stroke="#d81b60"
+      stroke-width="2.2"
+    />
+
+    <!-- Text inside heart -->
+    <text
+      x="130"
+      y="105"
+      text-anchor="middle"
+      fill="#6b0f1a"
+      font-size="14"
+      font-family="Arial, sans-serif"
+      font-weight="bold"
+    >
+      love u
+    </text>
+  </g>
+</svg>
