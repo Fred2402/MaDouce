@@ -88,7 +88,7 @@ export default function TimePage() {
           </p>
 
           <a
-            href="https://www.icloud.com/notes/03avQfj7ntDwQ9TGe1-wWFHsAet"
+            href="https://www.icloud.com/notes/03avQfj7ntDwQ9TGe1-wWFHsA"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block px-8 py-3 rounded-full bg-pink-500/80 hover:bg-pink-500 transition text-white font-light"
