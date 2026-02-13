@@ -13,6 +13,14 @@ const videos = [
     embedUrl: "https://www.youtube.com/embed/L0fsgy-VyC0",
   },
   {
+  title: "Lana Del Rey – Young and Beautiful",
+  embedUrl: "https://www.youtube.com/embed/o_1aF54DO60",
+},
+{
+  title: "Wallows – Are You Bored Yet?",
+  embedUrl: "https://www.youtube.com/embed/wIgmyE5Juzw",
+},
+  {
     title: "R5 – My Heart Made Up On You",
     embedUrl: "https://www.youtube.com/embed/jO1kDZzDpgw",
   },
