@@ -1,115 +1,129 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 
 const videos = [
   {
     title: "Wizkid – Final",
-    embed: "https://www.youtube.com/embed/srwAd1iR5qI",
+    embedUrl: "https://www.youtube.com/embed/srwAd1iR5qI",
   },
   {
     title: "Wizkid – CARO",
-    embed: "https://www.youtube.com/embed/L0fsgy-VyC0",
-  },
-  {
-    title: "Lana Del Rey – Young and Beautiful",
-    embed: "https://www.youtube.com/embed/o_1aF54DO60",
-  },
-  {
-    title: "Wallows – Are You Bored Yet?",
-    embed: "https://www.youtube.com/embed/wIgmyE5Juzw",
+    embedUrl: "https://www.youtube.com/embed/L0fsgy-VyC0",
   },
   {
     title: "R5 – My Heart Made Up On You",
-    embed: "https://www.youtube.com/embed/jO1kDZzDpgw",
+    embedUrl: "https://www.youtube.com/embed/jO1kDZzDpgw",
   },
   {
     title: "Humbe – Fantasma",
-    embed: "https://www.youtube.com/embed/e2c8NkNY41U",
+    embedUrl: "https://www.youtube.com/embed/e2c8NkNY41U",
   },
   {
     title: "RM & Aeon – Don’t",
-    embed: "https://www.youtube.com/embed/8Sd2n3Q5TnY",
+    embedUrl: "https://www.youtube.com/embed/oVPYa7QCmRg",
   },
   {
     title: "BTS – The Truth Untold",
-    embed: "https://www.youtube.com/embed/ITc-om9SVr4",
+    embedUrl: "https://www.youtube.com/embed/ITc-om9SVr4",
   },
   {
     title: "The Neighbourhood – Reflection",
-    embed: "https://www.youtube.com/embed/lP_xjVxCqU0",
+    embedUrl: "https://www.youtube.com/embed/x47TgeRJtH0",
   },
   {
     title: "The Neighbourhood – Nervous",
-    embed: "https://www.youtube.com/embed/XTDH7gSqwiQ",
+    embedUrl: "https://www.youtube.com/embed/XTDH7gSqwiQ",
   },
 ];
 
 export default function MusicPage() {
-  return (
-    <main className="min-h-screen bg-pink-50 text-center py-16 px-6">
-      <div className="max-w-5xl mx-auto">
-        
-        {/* Back Button */}
-        <div className="text-left mb-10">
-          <Link
-            href="/home"
-            className="text-pink-600 hover:text-pink-800 transition"
-          >
-            ← Back to Home
-          </Link>
-        </div>
+  const router = useRouter();
 
-        {/* Title */}
-        <h1 className="text-4xl font-light text-pink-600 mb-12">
-          Our Soundtrack 🤍
+  return (
+    <main
+      className="relative min-h-screen text-white"
+      style={{
+        backgroundImage: "url('/backgrounds/home-bg.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      {/* Flou */}
+      <div className="absolute inset-0 backdrop-blur-sm bg-white/20" />
+
+      {/* Bouton retour */}
+      <div className="relative z-10 pt-6 px-6">
+        <button
+          onClick={() => router.push("/home")}
+          className="text-white/80 hover:text-white transition"
+        >
+          ← Back to Home
+        </button>
+      </div>
+
+      {/* Contenu principal */}
+      <div className="relative z-10 px-6 py-16 max-w-6xl mx-auto">
+        <h1 className="text-4xl font-light text-center mb-12">
+          Our Music
         </h1>
 
-        {/* Videos Grid */}
-        <div className="grid md:grid-cols-2 gap-10">
+        {/* Vidéos */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 mb-24">
           {videos.map((video, index) => (
-            <div
+            <motion.div
               key={index}
-              className="bg-white p-4 rounded-2xl shadow-md"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.15 }}
+              className="bg-white/15 backdrop-blur-md rounded-3xl p-4 shadow-lg"
             >
-              <h2 className="text-lg mb-4 text-gray-700">
-                {video.title}
-              </h2>
-
-              <div className="aspect-video">
+              <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-4">
                 <iframe
-                  src={video.embed}
+                  src={video.embedUrl}
                   title={video.title}
-                  className="w-full h-full rounded-xl"
+                  className="w-full h-full"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
-                ></iframe>
+                />
               </div>
-            </div>
+
+              <p className="text-center text-lg font-light">
+                {video.title}
+              </p>
+            </motion.div>
           ))}
         </div>
 
-        {/* Poetic Section */}
-        <div className="mt-20 max-w-2xl mx-auto text-gray-600">
-          <p className="text-xl font-light leading-relaxed mb-6">
-            Music says the things we sometimes don’t know how to say.
+        {/* 💖 SECTION POÉTIQUE */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.5 }}
+          className="max-w-3xl mx-auto text-center bg-white/15 backdrop-blur-md rounded-3xl p-10"
+        >
+          <p className="text-xl font-light leading-relaxed mb-8">
+            Music has a way of saying what words sometimes can’t.  
             <br />
-            So let’s share our worlds through melodies.
+            I’d love to discover your world through the songs you love,  
             <br />
-            Let me discover your songs,
+            the melodies that comfort you, inspire you, or make you smile.  
             <br />
-            and discover a little more of you.
+            Share your favorite sounds with me,  
+            <br />
+            and let’s let our hearts listen together 🤍
           </p>
 
           <a
             href="https://music.apple.com/fr/playlist/partage-moi-tes-bons-go%C3%BBt/pl.u-76oNkmpuv5x2aML?a=join&it=QoG8k9ztQgNlrbAfz9Xb4"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block bg-pink-500 text-white px-6 py-3 rounded-full hover:bg-pink-600 transition"
+            className="inline-block px-8 py-3 rounded-full bg-pink-500/80 hover:bg-pink-500 transition text-white font-light"
           >
-            Share your music with me 🎶
+            Share your music with me 🎧
           </a>
-        </div>
+        </motion.div>
       </div>
     </main>
   );
