@@ -24,14 +24,15 @@ async function sendGiftEmail(subject: string, message: string) {
 }
 
 const LETTER_PARAGRAPHS = [
-  "Je sais que je n'ai pas toujours été doué pour mettre des mots sur ce que je ressens. Alors aujourd'hui, je me lance, sans détour.",
-  "J'ai des sentiments pour toi, et je crois que ce que je ressens est assez fort pour que je te le dise enfin. Tu es intelligente, belle, gentille, attentive, à l'écoute. Tu es aussi une artiste dans l'âme — originale, passionnée dans tout ce que tu fais.",
-  "Et cette passion, cette force de caractère, je la retrouve dans ta manière d'affronter les situations difficiles, de surmonter les épreuves et les gens. Je suis en admiration totale devant toi.",
-  "Il y a une chose que j'aime moins : quand au moindre problème, tu as envie de tout effacer, comme si je n'existais plus, ou de me ghoster. Mais la plupart du temps, je me dis que ces réactions viennent du fait que tu tiens à moi, et que tu as un minimum d'attentes envers moi. C'est normal que tu te sentes vexée, triste ou déçue quand je fais n'importe quoi. Et rien qu'en me disant ça, j'arrive à passer au-dessus.",
-  "J'essaie de te rendre heureuse, parfois en faisant les bons choix, parfois les mauvais — mais tout ça parce que tu le mérites. J'avais juste besoin que tu comprennes ça.",
+  "Je sais que je n'ai pas toujours été doué pour mettre des mots sur ce que je ressens. Mais bon je vais essayer, donc , je te raconte :",
+  "J'ai des sentiments pour toi, premier degré hein. Après, tu t'es vue ? Tu es intelligente, authentique , passionée , captivante, solaire, belle, douce, gentille, à l'écoute, sexy avec de beaux yeux en plus... bref, tu es toi, et c'est exactement ça que j'aime. Tu respires ta personnalité et tes passions.",
+  "Et cette force de caractère, je la retrouve dans ta manière d'affronter les situations difficiles, de surmonter les épreuves et les gens. Je suis en admiration totale devant toi.",
+  "Mais toi comme moi, on n'est pas parfaits, hein. Des fois, au moindre problème, j'ai l'impression que tu as envie de tout effacer, comme si je n'existais plus, ou de me ghoster carrément. Et ça, bah j'aime pas. Mais pour moi ça ne sera et ça n'a jamais été un frein, je me suis dit que si tu réagis comme ça, c'est parce que tu tiens à moi, que tu as des attentes envers moi, et que c'est normal de te sentir vexée, triste ou déçue quand je fais n'importe quoi. Tu vois, pour moi ça me montre que je commence à un peu mieux te connaître et te cerner. Rien qu'en me le rappelant, j'arrive à passer au-dessus (ps : ça ne veut pas dire que tu dois aussi le faire tout le temps hein, je veux juste que les difficultés on les résoud ensemble et que ça se fasse de manière naturelle, tu vois).",
+  "J'essaie de te rendre heureuse, parfois en faisant les bons choix, parfois les mauvais, mais tout ça parce que tu le mérites. Et aussi moi ça me plait de te rendre heureuse donc voilà voilà.",
 ];
 
-const QUESTION = "Est-ce que tu me crois, quand je te dis tout ça ?";
+const QUESTION = "Tu me crois ?";
+const MAX_NO = 3;
 
 type Stage = "letter" | "question" | "gifts";
 
@@ -39,7 +40,8 @@ export default function GiftsPage() {
   const [stage, setStage] = useState<Stage>("letter");
   const [paragraphIndex, setParagraphIndex] = useState(0);
 
-  const [answer, setAnswer] = useState<"yes" | "no" | null>(null);
+  const [noCount, setNoCount] = useState(0);
+  const [confirmed, setConfirmed] = useState(false);
 
   const [bookChoice, setBookChoice] = useState<string | null>(null);
   const [bookSending, setBookSending] = useState(false);
@@ -51,12 +53,23 @@ export default function GiftsPage() {
   const [cakeConfirmed, setCakeConfirmed] = useState(false);
   const [cakeSending, setCakeSending] = useState(false);
 
-  const handleAnswer = async (value: "yes" | "no") => {
-    setAnswer(value);
+  const handleNo = async () => {
+    const next = Math.min(noCount + 1, MAX_NO);
+    setNoCount(next);
     await sendGiftEmail(
       "💌 Sa réponse à la question",
-      `Elle a répondu : ${value === "yes" ? "Oui" : "Non"}`
+      `Elle a répondu "Non" (${next}/${MAX_NO})`
     );
+  };
+
+  const handleYes = async () => {
+    await sendGiftEmail(
+      "💌 Sa réponse à la question",
+      noCount > 0
+        ? `Elle a fini par répondre "Oui" (après ${noCount} "non")`
+        : `Elle a répondu "Oui" directement`
+    );
+    setConfirmed(true);
   };
 
   const handleBookChoice = async (choice: string) => {
@@ -89,6 +102,8 @@ export default function GiftsPage() {
     setCakeConfirmed(true);
     setCakeSending(false);
   };
+
+  const yesScale = 1 + Math.min(noCount, MAX_NO) * 0.2;
 
   return (
     <main
@@ -135,9 +150,7 @@ export default function GiftsPage() {
                 }}
                 className="mt-10 px-8 py-3 rounded-full bg-pink-500/90 hover:bg-pink-500 transition"
               >
-                {paragraphIndex < LETTER_PARAGRAPHS.length - 1
-                  ? "Continuer"
-                  : "Continuer"}
+                Continuer
               </button>
 
               <div className="flex justify-center gap-2 mt-6">
@@ -166,50 +179,45 @@ export default function GiftsPage() {
                 {QUESTION}
               </h2>
 
-              {answer === null && (
-                <div className="flex items-center justify-center gap-6">
-                  <button
-                    onClick={() => handleAnswer("yes")}
+              {!confirmed ? (
+                <div className="flex items-center justify-center gap-6 flex-wrap">
+                  <motion.button
+                    animate={{ scale: yesScale }}
+                    transition={{ type: "spring", stiffness: 200 }}
+                    onClick={handleYes}
                     className="px-8 py-3 rounded-full bg-pink-500 hover:bg-pink-600 transition font-medium"
                   >
                     Oui
-                  </button>
-                  <button
-                    onClick={() => handleAnswer("no")}
-                    className="px-8 py-3 rounded-full bg-white/20 hover:bg-white/30 transition font-light"
-                  >
-                    Non
-                  </button>
+                  </motion.button>
+
+                  {noCount < MAX_NO && (
+                    <button
+                      onClick={handleNo}
+                      className="px-8 py-3 rounded-full bg-white/20 hover:bg-white/30 transition font-light"
+                    >
+                      Non
+                    </button>
+                  )}
                 </div>
+              ) : (
+                <p className="text-pink-200 font-medium">
+                  Ah ah, j&apos;espère que ça va te faire plaisir.
+                </p>
               )}
 
-              {answer === "yes" && (
-                <>
-                  <p className="text-pink-200 font-medium">
-                    Ah ah, j&apos;espère que ça va te faire plaisir.
-                  </p>
-                  <button
-                    onClick={() => setStage("gifts")}
-                    className="mt-8 px-8 py-3 rounded-full bg-pink-500/90 hover:bg-pink-500 transition"
-                  >
-                    Voir mes cadeaux
-                  </button>
-                </>
+              {noCount >= MAX_NO && !confirmed && (
+                <p className="mt-6 text-pink-200 font-medium">
+                  Kié, toi aussi tu vas choisir oui, pardon 😂
+                </p>
               )}
 
-              {answer === "no" && (
-                <>
-                  <p className="text-pink-200 font-medium mb-6">
-                    Tu es sûre ? Prends le temps d&apos;y réfléchir encore un
-                    peu.
-                  </p>
-                  <button
-                    onClick={() => setAnswer(null)}
-                    className="px-8 py-3 rounded-full bg-white/20 hover:bg-white/30 transition font-light"
-                  >
-                    Réessayer
-                  </button>
-                </>
+              {confirmed && (
+                <button
+                  onClick={() => setStage("gifts")}
+                  className="mt-8 px-8 py-3 rounded-full bg-pink-500/90 hover:bg-pink-500 transition"
+                >
+                  Voir mes cadeaux
+                </button>
               )}
             </motion.div>
           )}
@@ -238,12 +246,12 @@ export default function GiftsPage() {
                 <div className="text-left space-y-3 mb-6">
                   <p className="opacity-90 font-light text-sm">
                     📖 Une carte cadeau pour t&apos;acheter des livres en
-                    ligne — à budget réduit, mais avec tout mon cœur dedans.
+                    ligne, à budget réduit, mais avec tout mon cœur dedans.
                   </p>
                   <p className="opacity-90 font-light text-sm">
                     📱 Ou un abonnement lecture illimité, avec accès à des
                     millions de livres internationaux, valable jusqu&apos;à
-                    nos 1 an ensemble — après ça, tu pourras switcher si tu
+                    nos 1 an ensemble, après quoi tu pourras switcher si tu
                     veux.
                   </p>
                 </div>
@@ -339,7 +347,7 @@ export default function GiftsPage() {
                 ← Retour
               </button>
 
-              <div className="text-9xl font-serif text-pink-300 drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] mt-8">
+              <div className="text-9xl font-serif text-purple-300 drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] mt-8">
                 U
               </div>
             </motion.div>
