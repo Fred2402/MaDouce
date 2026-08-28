@@ -68,6 +68,13 @@ export default function HomePage() {
         >
           ⏳ Time
         </button>
+
+        <button
+          onClick={() => (window.location.href = "/gifts")}
+          className="hover:scale-110 transition"
+        >
+          🎁 Gifts
+        </button>
       </nav>
 
       {/* Éléments flottants */}
