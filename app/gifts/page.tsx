@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-// 👉 Colle ici la clé reçue sur https://web3forms.com (gratuit, 30 secondes)
 const WEB3FORMS_ACCESS_KEY = "e9df262c-27c9-40be-96de-eaf7b700ef89";
 
 async function sendGiftEmail(subject: string, message: string) {
@@ -25,21 +24,14 @@ async function sendGiftEmail(subject: string, message: string) {
 }
 
 const LETTER_PARAGRAPHS = [
-  "Avant d'ouvrir quoi que ce soit, j'ai besoin de te dire quelque chose, vraiment.",
-  "Tu es devenue bien plus qu'une personne que j'aime. Tu es ma star, celle vers qui je lève les yeux même dans mes jours les plus flous. Et tu es aussi mon refuge, l'endroit où je pose les armes et où je respire enfin.",
-  "Je ne vais pas te mentir : je ne maîtrise pas encore tout ce que je ressens. Mais chaque jour j'y vois un peu plus clair, et ce que je découvre me plaît énormément. Tu comptes énormément pour moi, et l'idée de te perdre m'est insupportable.",
-  "Malgré les obstacles, malgré la distance, malgré tout ce qui pourrait nous compliquer la tâche, je suis heureux d'être avec toi. Et j'essaie chaque jour de t'offrir la meilleure version de moi-même.",
+  "Je sais que je n'ai pas toujours été doué pour mettre des mots sur ce que je ressens. Alors aujourd'hui, je me lance, sans détour.",
+  "Je t'aime, et je suis fan de toi, sincèrement. J'admire la force que tu montres face aux situations difficiles, ta manière de surmonter les épreuves et les gens. Je suis en admiration totale devant toi.",
+  "Il y a une chose que j'aime moins : quand au moindre problème, tu as envie de tout effacer, comme si je n'existais plus, ou de me ghoster. Mais la plupart du temps, je me dis que ces réactions viennent du fait que tu tiens à moi, et que tu as un minimum d'attentes envers moi. C'est normal de te sentir vexée, triste ou déçue quand je fais n'importe quoi. Et rien qu'en me disant ça, j'arrive à passer au-dessus.",
+  "J'essaie de te rendre heureuse, parfois en faisant les bons choix, parfois les mauvais — mais tout ça parce que tu le mérites. J'avais juste besoin que tu comprennes ça.",
 ];
 
-const QUESTION = "D'après ce que tu viens de lire, qu'est-ce que je suis pour toi ?";
-const OPTIONS = [
-  "Ta star et ton refuge 🌟",
-  "Un ami parmi d'autres",
-  "Une habitude comme une autre",
-  "Je ne sais pas encore",
-];
-const CORRECT_INDEX = 0;
-const MAX_ATTEMPTS = 3;
+const QUESTION = "Est-ce que tu me crois, quand je te dis tout ça ?";
+const MAX_NO = 3;
 
 type Stage = "letter" | "question" | "gifts";
 
@@ -47,9 +39,8 @@ export default function GiftsPage() {
   const [stage, setStage] = useState<Stage>("letter");
   const [paragraphIndex, setParagraphIndex] = useState(0);
 
-  const [attempts, setAttempts] = useState(0);
-  const [locked, setLocked] = useState<number | null>(null);
-  const [feedback, setFeedback] = useState<"idle" | "wrong" | "correct" | "revealed">("idle");
+  const [noCount, setNoCount] = useState(0);
+  const [confirmed, setConfirmed] = useState(false);
 
   const [bookChoice, setBookChoice] = useState<string | null>(null);
   const [bookSending, setBookSending] = useState(false);
@@ -61,29 +52,23 @@ export default function GiftsPage() {
   const [cakeConfirmed, setCakeConfirmed] = useState(false);
   const [cakeSending, setCakeSending] = useState(false);
 
-  const handleAnswer = async (index: number) => {
-    if (feedback === "correct" || feedback === "revealed") return;
-
-    const nextAttempts = attempts + 1;
-    setAttempts(nextAttempts);
-    const isCorrect = index === CORRECT_INDEX;
-
+  const handleNo = async () => {
+    const next = Math.min(noCount + 1, MAX_NO);
+    setNoCount(next);
     await sendGiftEmail(
       "💌 Sa réponse à la question",
-      `Tentative ${nextAttempts}/${MAX_ATTEMPTS} — elle a répondu : "${OPTIONS[index]}" ${
-        isCorrect ? "(bonne réponse ✅)" : "(mauvaise réponse ❌)"
-      }`
+      `Elle a répondu "Non" (${next}/${MAX_NO})`
     );
+  };
 
-    if (isCorrect) {
-      setLocked(index);
-      setFeedback("correct");
-    } else if (nextAttempts >= MAX_ATTEMPTS) {
-      setLocked(CORRECT_INDEX);
-      setFeedback("revealed");
-    } else {
-      setFeedback("wrong");
-    }
+  const handleYes = async () => {
+    await sendGiftEmail(
+      "💌 Sa réponse à la question",
+      noCount > 0
+        ? `Elle a fini par répondre "Oui" (après ${noCount} "non")`
+        : `Elle a répondu "Oui" directement`
+    );
+    setConfirmed(true);
   };
 
   const handleBookChoice = async (choice: string) => {
@@ -116,6 +101,8 @@ export default function GiftsPage() {
     setCakeConfirmed(true);
     setCakeSending(false);
   };
+
+  const yesScale = 1 + Math.min(noCount, MAX_NO) * 0.2;
 
   return (
     <main
@@ -189,51 +176,41 @@ export default function GiftsPage() {
               transition={{ duration: 0.8 }}
               className="w-full max-w-xl bg-white/15 backdrop-blur-md rounded-3xl p-10 text-center"
             >
-              <h2 className="text-2xl font-light mb-8">{QUESTION}</h2>
+              <h2 className="text-2xl font-light mb-10">{QUESTION}</h2>
 
-              <div className="flex flex-col gap-3">
-                {OPTIONS.map((option, index) => {
-                  const isLocked = locked !== null;
-                  const isCorrectOption = index === CORRECT_INDEX;
+              {!confirmed ? (
+                <div className="flex items-center justify-center gap-6 flex-wrap">
+                  <motion.button
+                    animate={{ scale: yesScale }}
+                    transition={{ type: "spring", stiffness: 200 }}
+                    onClick={handleYes}
+                    className="px-8 py-3 rounded-full bg-pink-500 hover:bg-pink-600 transition font-medium"
+                  >
+                    Oui
+                  </motion.button>
 
-                  return (
+                  {noCount < MAX_NO && (
                     <button
-                      key={option}
-                      disabled={isLocked}
-                      onClick={() => handleAnswer(index)}
-                      className={`px-5 py-3 rounded-full transition font-light ${
-                        isLocked && isCorrectOption
-                          ? "bg-pink-500 text-white"
-                          : "bg-white/20 hover:bg-white/30"
-                      } disabled:cursor-default`}
+                      onClick={handleNo}
+                      className="px-8 py-3 rounded-full bg-white/20 hover:bg-white/30 transition font-light"
                     >
-                      {option}
+                      Non
                     </button>
-                  );
-                })}
-              </div>
-
-              {feedback === "wrong" && (
-                <p className="mt-6 text-pink-200 font-medium">
-                  Pas tout à fait 🤔 — il te reste {MAX_ATTEMPTS - attempts} essai
-                  {MAX_ATTEMPTS - attempts > 1 ? "s" : ""}.
+                  )}
+                </div>
+              ) : (
+                <p className="text-pink-200 font-medium">
+                  Je le savais 🥹🤍
                 </p>
               )}
 
-              {feedback === "correct" && (
+              {noCount >= MAX_NO && !confirmed && (
                 <p className="mt-6 text-pink-200 font-medium">
-                  C&apos;est exactement ça 🥹🤍
+                  Tu abuses là 😏 — c&apos;est oui que tu devais dire.
                 </p>
               )}
 
-              {feedback === "revealed" && (
-                <p className="mt-6 text-pink-200 font-medium">
-                  La vraie réponse, c&apos;est celle-là 🤍 — et c&apos;est ce que tu es
-                  pour moi, vraiment.
-                </p>
-              )}
-
-              {(feedback === "correct" || feedback === "revealed") && (
+              {confirmed && (
                 <button
                   onClick={() => setStage("gifts")}
                   className="mt-8 px-8 py-3 rounded-full bg-pink-500/80 hover:bg-pink-500 transition"
@@ -261,13 +238,22 @@ export default function GiftsPage() {
 
               <div className="w-full max-w-md bg-white/15 backdrop-blur-md rounded-3xl p-8 text-center">
                 <p className="text-2xl mb-2">📚</p>
-                <h2 className="text-xl font-semibold mb-2">
+                <h2 className="text-xl font-semibold mb-4">
                   Pour la lectrice en toi
                 </h2>
-                <p className="opacity-80 mb-6 font-light">
-                  Choisis ton cadeau : une carte cadeau pour acheter des livres
-                  en ligne, ou un abonnement à une plateforme de lecture.
-                </p>
+
+                <div className="text-left space-y-3 mb-6">
+                  <p className="opacity-80 font-light text-sm">
+                    📖 Une carte cadeau pour t&apos;acheter des livres en
+                    ligne — à budget réduit, mais avec tout mon cœur dedans.
+                  </p>
+                  <p className="opacity-80 font-light text-sm">
+                    📱 Ou un abonnement lecture illimité, avec accès à des
+                    millions de livres internationaux, valable jusqu&apos;à
+                    nos 1 an ensemble — après ça, tu pourras switcher si tu
+                    veux.
+                  </p>
+                </div>
 
                 {bookChoice ? (
                   <p className="text-pink-200 font-medium">
@@ -280,16 +266,16 @@ export default function GiftsPage() {
                       onClick={() => handleBookChoice("Carte cadeau livres")}
                       className="px-5 py-2 rounded-full bg-pink-500/80 hover:bg-pink-500 transition disabled:opacity-50"
                     >
-                      Carte cadeau livres
+                      Carte cadeau
                     </button>
                     <button
                       disabled={bookSending}
                       onClick={() =>
-                        handleBookChoice("Abonnement lecture en ligne")
+                        handleBookChoice("Abonnement lecture illimité")
                       }
                       className="px-5 py-2 rounded-full bg-pink-500/80 hover:bg-pink-500 transition disabled:opacity-50"
                     >
-                      Abonnement lecture
+                      Abonnement illimité
                     </button>
                   </div>
                 )}
